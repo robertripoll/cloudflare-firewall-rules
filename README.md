@@ -1,6 +1,7 @@
 # Cloudflare Firewall Rules
 
 This project is a tool for synchronizing firewall rules with the latest Cloudflare IP addresses.
+
 It adds rules to `firewalld` allowing traffic coming from Cloudflare IP addresses on port 443.
 
 ## Requirements
@@ -13,7 +14,7 @@ To install the project, follow these steps:
 
 1. Clone the repository:
 
-`git clone https://github.com/your-username/cloudflare-ip-sync.git`
+`git clone https://github.com/robertripoll/cloudflare-firewall-rules.git`
 
 2. Install the dependencies:
 
@@ -21,9 +22,11 @@ To install the project, follow these steps:
 
 ## Usage
 
-To use the project, run the following command:
+To use the script, run the following command:
 
-`python main.py`
+`sudo python main.py`
+
+_The command has to be run with `sudo` because `firewall-cmd` requires `root` privileges._
 
 This will synchronize the firewall rules with the latest Cloudflare IP addresses.
 
