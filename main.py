@@ -1,8 +1,19 @@
+"""
+Synchronizes the Cloudflare IP addresses.
+
+This module provides functions for synchronizing the Cloudflare IP addresses. It uses
+the `requests` library to make HTTP requests to the Cloudflare API. It also uses the `json` library
+to parse and manipulate JSON data. It also uses the `os` and `subprocess` libraries to interact
+with the operating system. The module defines the following functions:
+
+- `get_last_cloudflare_ips()`: Retrieves the latest Cloudflare IP addresses.
+"""
+
 from typing import List
 import json
-import requests
 import os
 import subprocess
+import requests
 
 CLOUDFLARE_IPS_ENDPOINT = "https://api.cloudflare.com/client/v4/ips"
 CLOUDFLARE_IPS_CACHE_PATH = "/tmp/cloudflare_ips.json"
@@ -15,19 +26,22 @@ def get_last_cloudflare_ips() -> tuple[List[str], List[str], str]:
     Retrieves the latest Cloudflare IP addresses.
 
     Returns:
-        tuple[List[str], List[str], str]: A tuple containing two lists of IPv4 and IPv6 addresses, and a string representing the etag.
+        tuple[List[str], List[str], str]: A tuple containing two lists of IPv4 and IPv6 addresses,
+        and a string representing the etag.
     """
     headers = {"Content-Type": "application/json"}
     response = requests.request(
-        "GET", CLOUDFLARE_IPS_ENDPOINT, headers=headers)
+        "GET", CLOUDFLARE_IPS_ENDPOINT, headers=headers, timeout=30)
 
     if not response.ok or response.status_code != 200:
-        raise Exception(f"Request failed with status code {response.status_code}")
+        raise requests.HTTPError(f"Request failed with status code {
+                                 response.status_code} and message {response.text}")
 
     data = response.json()  # type: dict
 
     if not data.get("success"):
-        raise Exception(f"Request failed with errors {data.get('errors')}")
+        raise requests.HTTPError(f"Request failed with errors {
+                                 data.get('errors')}")
 
     result = data.get("result")  # type: dict
 
@@ -43,14 +57,15 @@ def get_cached_cloudflare_ips():
     Retrieves the cached Cloudflare IP addresses from the cache file.
 
     Returns:
-        tuple[List[str], List[str], str] or None: A tuple containing two lists of IPv4 and IPv6 addresses, and a string representing the etag.
-        If the cache file does not exist, returns None.
+        tuple[List[str], List[str], str] or None: A tuple containing two lists of
+        IPv4 and IPv6 addresses, and a string representing the etag. If the cache
+        file does not exist, returns None.
     """
     if not os.path.isfile(CLOUDFLARE_IPS_CACHE_PATH):
         return None
 
     # read file
-    with open(CLOUDFLARE_IPS_CACHE_PATH, 'r') as file:
+    with open(CLOUDFLARE_IPS_CACHE_PATH, 'r', encoding='utf-8') as file:
         data = file.read()
 
     # parse json
@@ -88,7 +103,7 @@ def set_cached_cloudflare_ips(ips_v4: List[str], ips_v6: List[str], etag: str):
     }
 
     # write cache
-    with open(CLOUDFLARE_IPS_CACHE_PATH, 'w') as file:
+    with open(CLOUDFLARE_IPS_CACHE_PATH, 'w', encoding='utf-8') as file:
         file.write(json.dumps(cache))
 
 
@@ -105,16 +120,15 @@ def run_firewall_cmd(args: str | List[str]):
     Returns:
         None
     """
-    if type(args) == str:
+    if isinstance(args, str):
         args = [args]
-
-    print(f"Running firewall command: {' '.join(args)}")
 
     result = subprocess.run(
         ['firewall-cmd'] + args, user='root', check=True, capture_output=True, text=True)
 
     if result.returncode != 0:
-        raise Exception("Could not run firewall command", result.stderr)
+        raise subprocess.CalledProcessError(
+            result.returncode, result.args, output=result.stdout, stderr=result.stderr)
 
 
 def generate_firewall_rule_args(operation: str, rule: str):
@@ -173,7 +187,13 @@ def generate_firewall_rule(ip: str, is_ipv6: bool):
     """
     family = "ipv6" if is_ipv6 else "ipv4"
 
-    return f'rule family="{family.strip()}" source address="{ip.strip()}" port port="{FIREWALL_HTTPS_PORT}" protocol="tcp" accept'
+    return (
+        f'rule family="{family.strip()}" '
+        f'source address="{ip.strip()}" '
+        f'port port="{FIREWALL_HTTPS_PORT}" '
+        f'protocol="tcp" '
+        "accept"
+    )
 
 
 def set_firewall_rule(ip: str, is_ipv6: bool):
@@ -256,10 +276,11 @@ def sync_firewall_rules():
 
 def sync_cloudflare_ips():
     """
-    Synchronizes the Cloudflare IP addresses by comparing the cached IP addresses with the latest IP addresses.
-    If the ETag of the cached IP addresses matches the ETag of the latest IP addresses, no synchronization is performed.
-    Otherwise, the firewall rules are unset for the cached IP addresses, the firewall rules are set for the latest IP addresses,
-    and the latest IP addresses are cached with their ETag.
+    Synchronizes the Cloudflare IP addresses by comparing the cached IP addresses with the
+    latest IP addresses. If the ETag of the cached IP addresses matches the ETag of the latest
+    IP addresses, no synchronization is performed. Otherwise, the firewall rules are unset for
+    the cached IP addresses, the firewall rules are set for the latest IP addresses, and the
+    latest IP addresses are cached with their ETag.
 
     This function does not take any parameters.
 
@@ -289,6 +310,15 @@ def sync_cloudflare_ips():
 
 
 def main():
+    """
+    Runs the main function that synchronizes the Cloudflare IP addresses by calling the
+    `sync_cloudflare_ips` function.
+
+    This function does not take any parameters.
+
+    Returns:
+        None
+    """
     sync_cloudflare_ips()
 
 
