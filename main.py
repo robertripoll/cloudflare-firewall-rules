@@ -22,8 +22,7 @@ def get_last_cloudflare_ips() -> tuple[List[str], List[str], str]:
         "GET", CLOUDFLARE_IPS_ENDPOINT, headers=headers)
 
     if not response.ok or response.status_code != 200:
-        raise Exception(f"Request failed with status code {
-                        response.status_code}")
+        raise Exception(f"Request failed with status code {response.status_code}")
 
     data = response.json()  # type: dict
 
