@@ -27,15 +27,6 @@ To use the project, run the following command:
 
 This will synchronize the firewall rules with the latest Cloudflare IP addresses.
 
-## Configuration
-
-The project requires the following configuration:
-
-- `CLOUDFLARE_IPS_CACHE_PATH`: The path to the cache file for Cloudflare IP addresses.
-- `FIREWALL_HTTPS_PORT`: The HTTPS port to allow in the firewall.
-
-These configuration values can be set in the `config.py` file.
-
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
