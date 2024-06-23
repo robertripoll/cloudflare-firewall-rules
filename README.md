@@ -5,7 +5,7 @@ It adds rules to `firewalld` allowing traffic coming from Cloudflare IP addresse
 
 ## Requirements
 
-This project requires Python 3.6 or higher.
+This project requires Python 3.10 or higher.
 
 ## Installation
 
