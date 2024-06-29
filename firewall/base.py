@@ -27,7 +27,11 @@ class Firewall(ABC):
     This class defines the interface for firewalls.
     """
 
-    def __init__(self, allowed_ports: set[int], ip_versions: set[IPVersion]):
+    def __init__(
+        self,
+        allowed_ports: set[int],
+        ip_versions: set[IPVersion] = None,
+    ):
         """
         Initializes the Firewall object with the given allowed ports and IP versions.
 
@@ -39,7 +43,8 @@ class Firewall(ABC):
             None
         """
         self.allowed_ports = allowed_ports
-        self.ip_versions = ip_versions
+        self.ip_versions = ip_versions if ip_versions is not None else {
+            IPVersion.V4, IPVersion.V6}
 
     @abstractmethod
     def is_rule_existing(self, ip_address: str, ip_version: IPVersion) -> bool:
