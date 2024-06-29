@@ -1,3 +1,10 @@
+"""
+This module defines the abstract base class for firewalls.
+
+This module provides the `Firewall` abstract base class that defines the interface
+for firewalls. It also defines the `IPVersion` enum that represents the version of an IP address.
+"""
+
 from abc import ABC, abstractmethod
 from enum import Enum
 
@@ -60,6 +67,23 @@ class Firewall(ABC):
             bool: True if the allow rule was successfully saved, False otherwise.
         """
 
+    def save_allow_rules(self, ip_address: set[str], ip_version: IPVersion) -> bool:
+        """
+        Save allow rules for multiple IP addresses.
+
+        Args:
+            ip_address (set[str]): A set of IP addresses for which to save the allow rules.
+            ip_version (IPVersion): The IP version for the allow rules.
+
+        Returns:
+            bool: True if all allow rules were successfully saved, False otherwise.
+        """
+        for ip in ip_address:
+            if not self.save_allow_rule(ip, ip_version):
+                return False
+
+        return True
+
     @abstractmethod
     def delete_allow_rule(self, ip_address: str, ip_version: IPVersion) -> bool:
         """
@@ -73,8 +97,33 @@ class Firewall(ABC):
             bool: True if the allow rule was successfully deleted, False otherwise.
         """
 
+    def delete_allow_rules(self, ip_address: set[str], ip_version: IPVersion) -> bool:
+        """
+        Delete allow rules for multiple IP addresses.
+
+        Args:
+            ip_address (set[str]): A set of IP addresses for which to delete the allow rules.
+            ip_version (IPVersion): The IP version for the allow rules.
+
+        Returns:
+            bool: True if all allow rules were successfully deleted, False otherwise.
+        """
+        for ip in ip_address:
+            if not self.delete_allow_rule(ip, ip_version):
+                return False
+
+        return True
+
 
 class SyncableFirewall(Firewall):
+    """
+    Interface for firewalls that can be synchronized.
+
+    This interface defines the methods that subclasses must implement to provide a
+    synchronization mechanism for updating firewall rules based on the current state of
+    the firewall.
+    """
+
     @abstractmethod
     def sync(self) -> bool:
         """
