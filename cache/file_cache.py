@@ -15,7 +15,7 @@ class FileCache(Cache):
     provided in the constructor.
     """
 
-    def __init__(self, path: str) -> None:
+    def __init__(self, path: str = DEFAULT_PATH) -> None:
         self.path = path
         self.cache = {}
         self.__load()
@@ -38,11 +38,11 @@ class FileCache(Cache):
     def has(self, key: str) -> bool:
         return key in self.cache
 
-    def get(self, key: str) -> str | list[str]:
+    def get(self, key: str) -> str | set[str]:
         if not self.has(key):
             raise KeyError
 
         return self.cache[key]
 
-    def set(self, key: str, value: str | list[str]) -> None:
+    def set(self, key: str, value: str | set[str]) -> None:
         self.cache[key] = value

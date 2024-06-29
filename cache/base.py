@@ -25,7 +25,7 @@ class Cache(ABC):
         """
 
     @abstractmethod
-    def get(self, key: str) -> str | list[str]:
+    def get(self, key: str) -> str | set[str]:
         """
         Get the value associated with the given key from the cache.
 
@@ -33,18 +33,18 @@ class Cache(ABC):
             key (str): The key to retrieve the value for.
 
         Returns:
-            str | list[str]: The value associated with the key. If the key does not exist,
-            an empty string or an empty list is returned.
+            str | set[str]: The value associated with the key. If the key does not exist,
+            an empty string or an empty set is returned.
         """
 
     @abstractmethod
-    def set(self, key: str, value: str | list[str]) -> None:
+    def set(self, key: str, value: str | set[str]) -> None:
         """
         Set the value associated with the given key in the cache.
 
         Args:
             key (str): The key to set the value for.
-            value (str | list[str]): The value to set.
+            value (str | set[str]): The value to set.
 
         Returns:
             None
@@ -71,44 +71,44 @@ class Cache(ABC):
         """
         self.set("etag", etag)
 
-    def get_ipv4_addresses(self) -> list[str]:
+    def get_ipv4_addresses(self) -> set[str]:
         """
         Get the list of CloudFlare IPv4 addresses from the cache.
 
         Returns:
-            list[str]: A list of IPv4 addresses if the "ips_v4" key exists in the cache,
-                      otherwise an empty list.
+            set[str]: A set of IPv4 addresses if the "ips_v4" key exists in the cache,
+                      otherwise an empty set.
         """
         return self.get("ips_v4") if self.has("ips_v4") else []
 
-    def set_ipv4_addresses(self, ips: list[str]) -> None:
+    def set_ipv4_addresses(self, ips: set[str]) -> None:
         """
         Set the list of CloudFlare IPv4 addresses in the cache.
 
         Args:
-            ips (list[str]): A list of IPv4 addresses to set in the cache.
+            ips (set[str]): A set of IPv4 addresses to set in the cache.
 
         Returns:
             None: This function does not return anything.
         """
         self.set("ips_v4", ips)
 
-    def get_ipv6_addresses(self) -> list[str]:
+    def get_ipv6_addresses(self) -> set[str]:
         """
         Get the list of CloudFlare IPv6 addresses from the cache.
 
         Returns:
-            list[str]: A list of IPv6 addresses if the "ips_v6" key exists in the cache,
-                      otherwise an empty list.
+            set[str]: A set of IPv6 addresses if the "ips_v6" key exists in the cache,
+                      otherwise an empty set.
         """
         return self.get("ips_v6") if self.has("ips_v6") else []
 
-    def set_ipv6_addresses(self, ips: list[str]) -> None:
+    def set_ipv6_addresses(self, ips: set[str]) -> None:
         """
         Set the list of CloudFlare IPv6 addresses in the cache.
 
         Args:
-            ips (list[str]): A list of IPv6 addresses to set in the cache.
+            ips (set[str]): A set of IPv6 addresses to set in the cache.
 
         Returns:
             None: This function does not return anything.
