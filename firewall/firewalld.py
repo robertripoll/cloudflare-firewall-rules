@@ -1,3 +1,10 @@
+"""
+This module contains the Firewalld class which is a subclass of SyncableFirewall
+and represents a syncable firewall using firewalld.
+
+This module provides a class Firewalld that provides methods to manage firewall rules.
+"""
+
 from enum import Enum
 from subprocess import run, CalledProcessError
 
@@ -69,16 +76,17 @@ class Firewalld(SyncableFirewall):
             "accept"
         )
 
-    def __generate_rule(self, ip_address: str, ip_version: IPVersion) -> set[str]:
-        rules: list[str] = []
+    def __generate_rules(self, ip_address: str, ip_version: IPVersion) -> set[str]:
+        rules: set[str] = set()
 
         for port in self.allowed_ports:
-            rules.append(self.__generate_rule(ip_address, ip_version, port))
+            rules.add(self.__generate_rule(ip_address=ip_address,
+                      ip_version=ip_version, port=port))
 
         return rules
 
     def is_rule_existing(self, ip_address: str, ip_version: IPVersion) -> bool:
-        rules = self.__generate_rule(ip_address, ip_version)
+        rules = self.__generate_rules(ip_address, ip_version)
 
         for rule in rules:
             self.__run_cmd(["--query-rich-rule", rule])
@@ -86,7 +94,7 @@ class Firewalld(SyncableFirewall):
         return True
 
     def save_allow_rule(self, ip_address: str, ip_version: IPVersion) -> bool:
-        rules = self.__generate_rule(ip_address, ip_version)
+        rules = self.__generate_rules(ip_address, ip_version)
 
         for rule in rules:
             self.__run_rule_cmd(Operation.SAVE, rule)
@@ -94,7 +102,7 @@ class Firewalld(SyncableFirewall):
         return True
 
     def delete_allow_rule(self, ip_address: str, ip_version: IPVersion) -> bool:
-        rules = self.__generate_rule(ip_address, ip_version)
+        rules = self.__generate_rules(ip_address, ip_version)
 
         for rule in rules:
             self.__run_rule_cmd(Operation.DELETE, rule)
