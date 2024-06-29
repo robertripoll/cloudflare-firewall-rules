@@ -8,6 +8,7 @@ the IPv4 and IPv6 addresses from the Cloudflare API.
 from requests import request, HTTPError
 
 
+# pylint: disable=R0903
 class CloudFlare:
     """
     Class representing the CloudFlare API.
