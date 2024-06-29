@@ -35,41 +35,46 @@ class Firewall(ABC):
         self.ip_versions = ip_versions
 
     @abstractmethod
-    def is_rule_existing(self, ip_address: str) -> bool:
+    def is_rule_existing(self, ip_address: str, ip_version: IPVersion) -> bool:
         """
-        Check if a rule already exists for the given IP address.
+        Check if a rule already exists for the given IP address and IP version.
 
         Args:
             ip_address (str): The IP address to check for an existing rule.
+            ip_version (IPVersion): The IP version for the rule.
 
         Returns:
-            bool: True if a rule exists for the given IP address, False otherwise.
+            bool: True if a rule exists for the given IP address and IP version, False otherwise.
         """
 
     @abstractmethod
-    def save_allow_rule(self, ip_address: str) -> bool:
+    def save_allow_rule(self, ip_address: str, ip_version: IPVersion) -> bool:
         """
         Save an allow rule for the given IP address.
 
         Args:
             ip_address (str): The IP address for which to save the allow rule.
+            ip_version (IPVersion): The IP version for the allow rule.
 
         Returns:
             bool: True if the allow rule was successfully saved, False otherwise.
         """
 
     @abstractmethod
-    def delete_allow_rule(self, ip_address: str) -> bool:
+    def delete_allow_rule(self, ip_address: str, ip_version: IPVersion) -> bool:
         """
-        Delete an allow rule for the given IP address.
+        Delete an allow rule for the given IP address and IP version.
 
         Args:
             ip_address (str): The IP address for which to delete the allow rule.
+            ip_version (IPVersion): The IP version for the allow rule.
 
         Returns:
             bool: True if the allow rule was successfully deleted, False otherwise.
         """
 
+
+class SyncableFirewall(Firewall):
     @abstractmethod
     def sync(self) -> bool:
         """

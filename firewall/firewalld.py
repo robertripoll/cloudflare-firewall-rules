@@ -1,7 +1,7 @@
 from enum import Enum
 from subprocess import run, CalledProcessError
 
-from firewall.base import Firewall, IPVersion
+from firewall.base import IPVersion, SyncableFirewall
 
 
 class Operation(Enum):
@@ -15,9 +15,9 @@ class Operation(Enum):
     DELETE = 'remove'
 
 
-class Firewalld(Firewall):
+class Firewalld(SyncableFirewall):
     """
-    Class representing a firewall using firewalld.
+    Class representing a syncable firewall using firewalld.
 
     This class provides methods to manage firewall rules.
     """
@@ -69,7 +69,7 @@ class Firewalld(Firewall):
             "accept"
         )
 
-    def __generate_rules_for_version(self, ip_address: str, ip_version: IPVersion) -> list[str]:
+    def __generate_rule(self, ip_address: str, ip_version: IPVersion) -> set[str]:
         rules: list[str] = []
 
         for port in self.allowed_ports:
@@ -77,32 +77,24 @@ class Firewalld(Firewall):
 
         return rules
 
-    def __generate_rules(self, ip_address: str) -> list[str]:
-        rules_ipv4 = self.__generate_rules_for_version(
-            ip_address, IPVersion.V4)
-        rules_ipv6 = self.__generate_rules_for_version(
-            ip_address, IPVersion.V6)
-
-        return rules_ipv4 + rules_ipv6
-
-    def is_rule_existing(self, ip_address: str) -> bool:
-        rules = self.__generate_rules(ip_address)
+    def is_rule_existing(self, ip_address: str, ip_version: IPVersion) -> bool:
+        rules = self.__generate_rule(ip_address, ip_version)
 
         for rule in rules:
             self.__run_cmd(["--query-rich-rule", rule])
 
         return True
 
-    def save_allow_rule(self, ip_address: str) -> bool:
-        rules = self.__generate_rules(ip_address)
+    def save_allow_rule(self, ip_address: str, ip_version: IPVersion) -> bool:
+        rules = self.__generate_rule(ip_address, ip_version)
 
         for rule in rules:
             self.__run_rule_cmd(Operation.SAVE, rule)
 
         return True
 
-    def delete_allow_rule(self, ip_address: str) -> bool:
-        rules = self.__generate_rules(ip_address)
+    def delete_allow_rule(self, ip_address: str, ip_version: IPVersion) -> bool:
+        rules = self.__generate_rule(ip_address, ip_version)
 
         for rule in rules:
             self.__run_rule_cmd(Operation.DELETE, rule)
