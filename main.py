@@ -3,9 +3,11 @@ This module contains the main entry point of the application.
 
 It manages the synchronization of firewall rules with the latest Cloudflare IP addresses.
 
-It retrieves the latest IPv4 and IPv6 addresses from the Cloudflare API and compares them with the cached IP addresses.
+It retrieves the latest IPv4 and IPv6 addresses from the Cloudflare API and compares them with the
+cached IP addresses.
 
-If the cached ETag is different from the latest ETag, it removes the old allow rules and adds the new allow rules.
+If the cached ETag is different from the latest ETag, it removes the old allow rules and adds the
+new allow rules.
 
 The firewall rules are saved to the `firewalld` and synchronized.
 
@@ -66,6 +68,29 @@ def add_new_allow_rules(ipv4: set[str], ipv6: set[str], firewall: Firewall) -> b
 
 
 def main():
+    """
+    The main function of the program.
+
+    This function performs the following steps:
+    1. Initializes a cache using the FileCache class.
+    2. Initializes a CloudFlare object.
+    3. Retrieves the cached ETag from the cache.
+    4. Retrieves the latest IPv4 and IPv6 addresses from the CloudFlare API.
+    5. If the cached ETag is the same as the latest ETag, the function returns.
+    6. Initializes a firewall object using the Firewalld class.
+    7. If there is a cached ETag, retrieves the cached IPv4 and IPv6 addresses from the cache.
+    8. Removes the old allow rules from the firewall using the cached IPv4 and IPv6 addresses.
+    9. Adds new allow rules to the firewall using the latest IPv4 and IPv6 addresses.
+    10. Synchronizes the firewall rules.
+    11. Sets the latest ETag in the cache.
+
+    Returns:
+        None
+
+    Example:
+        >>> main()
+    """
+
     cache: Cache = FileCache()
     cloudflare = CloudFlare()
 
