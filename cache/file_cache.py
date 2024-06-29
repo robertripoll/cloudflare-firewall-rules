@@ -1,3 +1,11 @@
+"""
+This module contains the implementation of the FileCache class that
+stores the cache data in a file.
+
+The cache data is stored in JSON format in the file located at the path
+provided in the constructor.
+"""
+
 from json import load as json_load, dump as json_dump
 from os.path import exists as path_exists
 

@@ -1,3 +1,14 @@
+"""
+Module containing the base classes for caching mechanisms.
+
+This module provides an abstract base class `Cache` that defines the interface
+for caching mechanisms. It also contains a dictionary `DEFAULT_CACHE` that
+represents the default values for the cache.
+
+Classes:
+    Cache: Abstract base class for caching mechanisms.
+"""
+
 from abc import ABC, abstractmethod
 
 DEFAULT_CACHE = {
