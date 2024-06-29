@@ -32,7 +32,7 @@ class Firewalld(SyncableFirewall):
     def __init__(
         self,
         allowed_ports: set[int],
-        ip_versions: set[IPVersion],
+        ip_versions: set[IPVersion] = None,
         is_permanent: bool = True,
         zone: str = "public",
     ):
