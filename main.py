@@ -1,3 +1,17 @@
+"""
+This module contains the main entry point of the application.
+
+It manages the synchronization of firewall rules with the latest Cloudflare IP addresses.
+
+It retrieves the latest IPv4 and IPv6 addresses from the Cloudflare API and compares them with the cached IP addresses.
+
+If the cached ETag is different from the latest ETag, it removes the old allow rules and adds the new allow rules.
+
+The firewall rules are saved to the `firewalld` and synchronized.
+
+The latest ETag is cached for future comparisons.
+"""
+
 from cache.base import Cache
 from cache.file_cache import FileCache
 from cloudflare.base import CloudFlare
@@ -6,6 +20,17 @@ from firewall.firewalld import Firewalld
 
 
 def remove_old_allow_rules(ipv4: set[str], ipv6: set[str], firewall: Firewall) -> bool:
+    """
+    Removes old allow rules for IPv4 and IPv6 from the given firewall.
+
+    Args:
+        ipv4 (set[str]): A set of IPv4 addresses for which old allow rules should be removed.
+        ipv6 (set[str]): A set of IPv6 addresses for which old allow rules should be removed.
+        firewall (Firewall): An instance of the Firewall class representing the firewall.
+
+    Returns:
+        bool: True if all old allow rules were successfully removed, False otherwise.
+    """
     if not firewall.delete_allow_rules(ipv4, IPVersion.V4):
         return False
 
@@ -16,6 +41,17 @@ def remove_old_allow_rules(ipv4: set[str], ipv6: set[str], firewall: Firewall) -
 
 
 def add_new_allow_rules(ipv4: set[str], ipv6: set[str], firewall: Firewall) -> bool:
+    """
+    Adds new allow rules to the firewall.
+
+    Args:
+        ipv4 (set[str]): A set of IPv4 addresses for which to add allow rules.
+        ipv6 (set[str]): A set of IPv6 addresses for which to add allow rules.
+        firewall (Firewall): An instance of the Firewall class representing the firewall.
+
+    Returns:
+        bool: True if all allow rules were successfully added, False otherwise.
+    """
     if not firewall.save_allow_rules(ipv4, IPVersion.V4):
         return False
 
@@ -23,7 +59,8 @@ def add_new_allow_rules(ipv4: set[str], ipv6: set[str], firewall: Firewall) -> b
         return False
 
     if issubclass(type(firewall), SyncableFirewall):
-        return firewall.sync()
+        syncable_firewall: SyncableFirewall = firewall
+        return syncable_firewall.sync()
 
     return True
 
@@ -38,16 +75,15 @@ def main():
     if cached_etag == last_etag:
         return
 
-    firewall: Firewall = Firewalld()
+    firewall: Firewall = Firewalld({443})
 
-    if cached_etag != None:
+    if cached_etag is not None:
         cached_ipv4: set[str] = cache.get('ipv4')
         cached_ipv6: set[str] = cache.get('ipv6')
 
         remove_old_allow_rules(cached_ipv4, cached_ipv6, firewall)
 
-    firewall.save_allow_rules(last_ips_v4, IPVersion.V4)
-    firewall.save_allow_rules(last_ips_v6, IPVersion.V6)
+    add_new_allow_rules(last_ips_v4, last_ips_v6, firewall)
 
     firewall.sync()
     cache.set("etag", last_etag)
