@@ -1,3 +1,10 @@
+"""
+Module providing the CloudFlare class for interacting with the Cloudflare API.
+
+This module contains the CloudFlare class, which is responsible for retrieving
+the IPv4 and IPv6 addresses from the Cloudflare API.
+"""
+
 from requests import request, HTTPError
 
 
